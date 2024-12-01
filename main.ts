@@ -122,6 +122,7 @@ h1, h2, h3, h4, h5, h6 {
 html {
   font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-weight: 400;
+  color: #303030;
 }
 body {
   margin: 1rem;
@@ -152,8 +153,11 @@ td {
   word-break: break-all;
 }
 pre {
+  width: fit-content;
+  max-width: 100%;
   overflow-x: auto;
   padding: 0.25rem;
+  font-family: sSFMono-Regular, Consolas, "Roboto Mono", "Droid Sans Mono", "Liberation Mono", Menlo, Courier, monospace;
   background-color: #f3f3f3;
 }
 .request {
