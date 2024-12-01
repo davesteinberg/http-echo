@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "start": "deno run -NE main.ts",
+    "dev": "deno run -NE --watch main.ts"
+  },
+  "fmt": {
+    "lineWidth": 100,
+    "proseWrap": "preserve"
+  }
+}
