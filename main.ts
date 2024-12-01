@@ -14,6 +14,8 @@ import { accepts } from "jsr:@std/http/negotiation";
  * TERSE_RESPONSE: "true" to exclude most request details from the response.
  */
 const config = {
+  hostname: Deno.hostname(),
+  pid: Deno.pid,
   logHandler: Deno.env.get("LOG_FORMAT") === "json" ? "json" : "default",
   logLevel: "DEBUG",
   port: parseInt(Deno.env.get("PORT")!) || 9080,
@@ -30,7 +32,7 @@ function collapseArgs(args: unknown[]) {
 log.setup({
   handlers: {
     default: new log.ConsoleHandler("DEBUG", {
-      formatter: (r) => `[${r.datetime.toISOString()}] ${r.levelName}: ${r.msg}`,
+      formatter: (r) => `[${r.datetime.toISOString()}] ${r.levelName} (${config.pid}): ${r.msg}`,
     }),
     json: new log.ConsoleHandler("DEBUG", {
       formatter: (r) =>
@@ -38,6 +40,8 @@ log.setup({
           time: r.datetime.toISOString(),
           level: r.levelName,
           msg: r.msg,
+          hostname: config.hostname,
+          pid: config.pid,
           ...collapseArgs(r.args),
         }),
       useColors: false,
@@ -64,8 +68,10 @@ type SimpleRequest = {
 };
 
 function echoJson(request: SimpleRequest) {
-  const echo = { request: config.terseResponse ? pick(request, ["method", "url"]) : request };
-  return JSON.stringify(echo);
+  if (config.terseResponse) {
+    return JSON.stringify({ request: pick(request, ["method", "url"]) });
+  }
+  return JSON.stringify({ server: { hostname: config.hostname }, request });
 }
 
 function echoHtmlDetails(request: SimpleRequest) {
@@ -168,10 +174,22 @@ pre {
 </head>
 <body>
 <h1>HTTP Echo</h1>
+${config.terseResponse ? "" : `<p>Served by ${config.hostname}</p>`}
 <h2>Request</h2>
 <p class="request">${request.method} ${request.url}</p>
 ${config.terseResponse ? "" : echoHtmlDetails(request)}</body>
 </html>`;
+}
+
+function echoText(request: SimpleRequest) {
+  const terse = `${request.method} ${request.url}\n`;
+  if (config.terseResponse) {
+    return terse;
+  }
+
+  const headers = request.headers.map((h) => `${h[0]}: ${h[1]}`);
+  const body = request.body.length == 0 ? "" : `\n${request.body}\n`;
+  return `${config.hostname}\n\n${terse}\n${headers.join("\n")}\n${body}`;
 }
 
 Deno.serve({ port: config.port, onListen }, async (req) => {
@@ -193,8 +211,13 @@ Deno.serve({ port: config.port, onListen }, async (req) => {
   };
   log.debug("Echoing request", { request });
 
-  const contentType = accepts(req, "application/json", "text/html") || "text/html";
-  const body = contentType === "application/json" ? echoJson(request) : echoHtml(request);
+  const contentType = accepts(req, "application/json", "text/html") || "text/plain";
+  const body = contentType === "application/json"
+    ? echoJson(request)
+    : contentType === "text/html"
+    ? echoHtml(request)
+    : echoText(request);
+
   const res = new Response(body, { headers: { "Content-Type": contentType } });
   const ms = new Date().valueOf() - start.valueOf();
   const msg = `${req.method} ${url} ${res.status} - - ${ms} ms`;

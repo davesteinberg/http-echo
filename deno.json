@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "start": "deno run -NE main.ts",
-    "dev": "deno run -NE --watch main.ts"
+    "start": "deno run -NES main.ts",
+    "dev": "deno run -NES --watch main.ts"
   },
   "fmt": {
     "lineWidth": 100,

@@ -6,4 +6,4 @@ WORKDIR /app
 COPY main.ts deno.lock ./
 RUN deno install --frozen --entrypoint main.ts
 USER deno
-CMD ["run", "--cached-only", "--allow-net", "--allow-env", "main.ts"]
+CMD ["run", "--cached-only", "--allow-net", "--allow-env", "--allow-sys", "main.ts"]
