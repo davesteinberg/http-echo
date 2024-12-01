@@ -21,11 +21,12 @@ deno task dev
 
 The echo server is configurable via environment variables.
 
-| Variable         | Description                                                |
-| ---------------- | ---------------------------------------------------------- |
-| `LOG_FORMAT`     | "json" for structured logs, default pretty logs otherwise. |
-| `PORT`           | TCP port on which to listen (default: 9080).               |
-| `TERSE_RESPONSE` | "true" to exclude most request details from the response.  |
+| Variable         | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `LOG_FORMAT`     | "json" for structured logs, default pretty logs otherwise.                        |
+| `LOG_LEVEL`      | Minimum level to log, one "DEBUG" (default), "INFO", "WARN", "ERROR", "CRITICAL". |
+| `PORT`           | TCP port on which to listen (default: 9080).                                      |
+| `TERSE_RESPONSE` | "true" to exclude most request details from the response.                         |
 
 ## Image build
 

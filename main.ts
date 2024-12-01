@@ -10,6 +10,7 @@ import { accepts } from "jsr:@std/http/negotiation";
  * Environment variables
  *
  * LOG_FORMAT: "json" for structured logs, default pretty logs otherwise.
+ * LOG_LEVEL: Minimum level to log, one of "DEBUG" (default), "INFO", "WARN", "ERROR", "CRITICAL".
  * PORT: TCP port on which to listen (default: 9080).
  * TERSE_RESPONSE: "true" to exclude most request details from the response.
  */
@@ -17,10 +18,18 @@ const config = {
   hostname: Deno.hostname(),
   pid: Deno.pid,
   logHandler: Deno.env.get("LOG_FORMAT") === "json" ? "json" : "default",
-  logLevel: "DEBUG",
+  logLevel: toLogLevelName(Deno.env.get("LOG_LEVEL"), "DEBUG"),
   port: parseInt(Deno.env.get("PORT")!) || 9080,
   terseResponse: Deno.env.get("TERSE_RESPONSE") === "true",
 } as const;
+
+function isLogLevelName(s: string | undefined): s is log.LevelName {
+  return log.LogLevelNames.includes(s as log.LevelName);
+}
+
+function toLogLevelName(s: string | undefined, defaultLevel: log.LevelName): log.LevelName {
+  return isLogLevelName(s) ? s : defaultLevel;
+}
 
 function collapseArgs(args: unknown[]) {
   if (args.length === 0) return {};
